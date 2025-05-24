@@ -23,6 +23,7 @@ public class JSONTranslator implements Translator {
     /**
      * Constructs a JSONTranslator using data from the sample.json resources file.
      */
+
     private List<String> countryCodes = new ArrayList<>();
     private List<List<String>> languageCodes = new ArrayList<>(); // stores lists of languagecode for each country in json
     private List<Map<String, String>> translations = new ArrayList<>();
