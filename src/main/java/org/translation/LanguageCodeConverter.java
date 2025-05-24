@@ -40,14 +40,15 @@ public class LanguageCodeConverter {
             Iterator<String> iterator = lines.iterator();
 
             if(iterator.hasNext()){ // skip first line
-                iterator.hasNext();
+                iterator.next();
             }
             while(iterator.hasNext()){ // populate the hashmap instance variable
                 String line = iterator.next().trim();
+                if(line.isEmpty()) continue;
                 String[] parts = line.split("\\s+");
                 if(parts.length >= 2){
-                    String language = parts[parts.length - 1];
-                    String code = String.join(" ", java.util.Arrays
+                    String code = parts[parts.length - 1].toLowerCase();
+                    String language = String.join(" ", java.util.Arrays
                             .copyOfRange(parts, 0, parts.length - 1));
                     this.languageCodes.put(language, code);
                 }
@@ -65,8 +66,9 @@ public class LanguageCodeConverter {
      */
     public String fromLanguageCode(String code) {
         // TODO Task: update this code to use your instance variable to return the correct value
+        String normal = code.toLowerCase();
         for(Map.Entry<String, String> entry : this.languageCodes.entrySet()){ // use entryset to loop through entire hashmap
-            if(entry.getValue().equals(code)){
+            if(entry.getValue().equals(normal)){
                 return entry.getKey();
             }
         }
@@ -87,17 +89,13 @@ public class LanguageCodeConverter {
         }
         return "Provided country Name does not exist";
     }
-
+    ///
     /**
      * Returns how many languages are included in this code converter.
      * @return how many languages are included in this code converter.
      */
     public int getNumLanguages() {
         // TODO Task: update this code to use your instance variable to return the correct value
-        int count = 0;
-        for(int i = 0; i < this.languageCodes.size(); i++){
-            count ++;
-        }
-        return count;
+        return this.languageCodes.size();
     }
 }

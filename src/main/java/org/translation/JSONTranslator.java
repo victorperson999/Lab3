@@ -4,10 +4,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.HashMap;
+import java.util.*;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -51,33 +48,23 @@ public class JSONTranslator implements Translator {
             // 1) populate the countryCodes instance variable
             for(int i = 0; i < jsonArray.length(); i++){
                 JSONObject obj = jsonArray.getJSONObject(i);
-                String countryCode = obj.getString("alpha3");
-                countryCodes.add(countryCode);
-            }
-            // 2) populate the languagesCodes instance variable
-            for(int i = 0; i < jsonArray.length(); i++){
-                JSONObject obj = jsonArray.getJSONObject(i); // gets that jsonobject (in this case the "dictionaries")
-                List<String> countryCodeSet = new ArrayList<>(); // init empty arraylist
+                String alpha3 = obj.getString("alpha3");
+                countryCodes.add(alpha3);
+
+                List<String> countryCodeSet = new ArrayList<>();
+                Map<String, String> mapTranslations = new HashMap<>();
+
                 for(String key: obj.keySet()){ // for each json array object (obj) we get the keyset
                     if(key.equals("id")||key.equals("alpha2")||key.equals("alpha3")){
                         continue;
                     }
                     countryCodeSet.add(key); // for each key we add to the temp arraylist
-                }
-                this.languageCodes.add(countryCodeSet); // after each json object, we add the temp arraylist to the languagecodes arraylist
-            }
-            // 3) build the translations instance variable
-            for(int i = 0; i < jsonArray.length(); i++){
-                JSONObject obj = jsonArray.getJSONObject(i);
-                Map<String, String> mapTranslations = new HashMap<>();
-                for(String key: obj.keySet()){
-                    if(key.equals("id")||key.equals("alpha2")||key.equals("alpha3")){
-                        continue;
-                    }
                     mapTranslations.put(key, obj.getString(key));
                 }
+                this.languageCodes.add(countryCodeSet);
                 this.translations.add(mapTranslations);
             }
+
         }
         catch (IOException | URISyntaxException ex) {
             throw new RuntimeException(ex);
@@ -88,29 +75,26 @@ public class JSONTranslator implements Translator {
     public List<String> getCountryLanguages(String country) {
         // TODO Task: return an appropriate list of language codes,
         //            but make sure there is no aliasing to a mutable object
-        CountryCodeConverter converter = new CountryCodeConverter();
-        String countryCode = converter.fromCountry(country);
+        String countryCode = country.toLowerCase();
         // we have the correct country code now, obtain the list of language codes
-        for(int i = 0; i < this.countryCodes.size(); i++){
-            if(this.countryCodes.get(i).equals(countryCode)){
-                return this.languageCodes.get(i); // once we find the index of the country, since the arraylists are parallel, return languagecodes at the same index.
-            }
+        int index = this.countryCodes.indexOf(countryCode);
+        if(index<0){
+            throw new IllegalArgumentException("Unknown country" + country);
         }
-        throw new IllegalArgumentException("Unknown Country: " + country);
+        return new ArrayList<>(this.languageCodes.get(index));
     }
 
     @Override
     public List<String> getCountries() {
         // TODO Task: return an appropriate list of country codes,
         //            but make sure there is no aliasing to a mutable object
-        return this.countryCodes; // this returns the contents of all the country codes
+        return new ArrayList<>(this.countryCodes); // this returns the contents of all the country codes
     }
 
     @Override
     public String translate(String country, String language) {
         // TODO Task: complete this method using your instance variables as needed
-        CountryCodeConverter converter = new CountryCodeConverter();
-        String countryCode = converter.fromCountry(country);
+        String countryCode = country.toLowerCase();
         // again, we have the correct country code
         int index = this.countryCodes.indexOf(countryCode);
 
@@ -126,4 +110,5 @@ public class JSONTranslator implements Translator {
         }
         return map.get(language);
     }
+
 }
